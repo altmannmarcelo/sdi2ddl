@@ -30,7 +30,7 @@ jobs:
       
     - name: Pack
       # Create a package with file
-      run: tar czfv ${{github.workspace}}/build/sdi2ddl.tar.gz ${{github.workspace}}/build/sdi2ddl
+      run: tar czfv ${{github.workspace}}/build/sdi2ddl.tar.gz -C ${{github.workspace}}/build/ sdi2ddl
       
     - name: Upload
       uses: actions/upload-artifact@v3
