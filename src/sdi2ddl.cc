@@ -90,11 +90,17 @@ static bool parse_column_attribute(const rapidjson::Value *column, string &ddl,
     if (column->FindMember(attribute)->value.GetBool()) {
       ddl += " DEFAULT NULL";
     } else {
+      if (!column->HasMember("default_value_utf8_null")) {
+        cout << "Error Reading column attribute default_value_utf8_null"
+             << endl;
+        return false;
+      }
       if (!column->HasMember("default_value_utf8")) {
         cout << "Error Reading column attribute default_value_utf8" << endl;
         return false;
       }
-      if (column->FindMember("default_value_utf8")->value.GetString() != "") {
+      if (!column->FindMember("default_value_utf8_null")->value.GetBool() &&
+          column->FindMember("default_value_utf8")->value.GetString() != "") {
         ddl += " DEFAULT '";
         ddl += column->FindMember("default_value_utf8")->value.GetString();
         ddl += "'";
