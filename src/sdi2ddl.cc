@@ -1,8 +1,8 @@
 #include <fstream>
 #include <iostream>
 #include <unordered_map>
-#include "rapidjson/document.h"
 #include "include/collations.h"
+#include "rapidjson/document.h"
 
 using namespace std;
 using namespace rapidjson;
@@ -31,7 +31,7 @@ static bool add_column_to_map(const rapidjson::Value *column) {
     cout << "Error Reading column ordinal_position or name" << endl;
     return false;
   }
-  column_map[column->FindMember("ordinal_position")->value.GetInt()-1] =
+  column_map[column->FindMember("ordinal_position")->value.GetInt() - 1] =
       column->FindMember("name")->value.GetString();
   return true;
 }
@@ -68,7 +68,7 @@ static bool parse_column_attribute(const rapidjson::Value *column, string &ddl,
       }
       collation_info collation;
       if (!find_collation(column->FindMember("collation_id")->value.GetInt(),
-                              collation)) {
+                          collation)) {
         cout << "Error finding collation info" << endl;
         return false;
       }
@@ -133,7 +133,8 @@ static bool parse_columns(const rapidjson::Value::ConstObject &dd_object,
     if (!parse_column_attribute(col, ddl, "name", true)) return false;
     if (!parse_column_attribute(col, ddl, "column_type_utf8", true))
       return false;
-    if (!parse_column_attribute(col, ddl, "is_explicit_collation", false)) return false;
+    if (!parse_column_attribute(col, ddl, "is_explicit_collation", false))
+      return false;
     if (!parse_column_attribute(col, ddl, "is_nullable", false)) return false;
     if (!parse_column_attribute(col, ddl, "is_auto_increment", false))
       return false;
@@ -146,9 +147,10 @@ static bool parse_columns(const rapidjson::Value::ConstObject &dd_object,
 /** Parse the indexes section of SDI JSON
 @param[in]	    dd_object	Data Dictionary JSON object
 @param[in,out]	ddl     	DDL string
+@param[in,out]	n_index   Number of indexes
 @return False in case of errors */
 static bool parse_indexes(const rapidjson::Value::ConstObject &dd_object,
-                          string &ddl) {
+                          string &ddl, int &n_index) {
   if (!dd_object.HasMember("indexes")) {
     cout << "Error Reading indexes from dd_object" << endl;
     return false;
@@ -159,6 +161,12 @@ static bool parse_indexes(const rapidjson::Value::ConstObject &dd_object,
       cout << "Error Reading index object from dd_object" << endl;
       return false;
     }
+    if (!index->HasMember("hidden")) {
+      cout << "Error Reading elements from index object" << endl;
+      return false;
+    }
+    if ((*index)["hidden"].GetBool()) continue;
+
     if (!index->HasMember("elements")) {
       cout << "Error Reading elements from index object" << endl;
       return false;
@@ -183,6 +191,7 @@ static bool parse_indexes(const rapidjson::Value::ConstObject &dd_object,
         return false;
         break;
     }
+    n_index++;
     for (auto index_col = (*index)["elements"].Begin();
          index_col != (*index)["elements"].End(); ++index_col) {
       if (!index_col->IsObject()) {
@@ -222,8 +231,7 @@ static bool parse_collation(const collation_info &collation, string &ddl) {
   ddl += " DEFAULT CHARSET=";
   ddl += collation.charset;
 
-  if(!collation.is_default)
-  {
+  if (!collation.is_default) {
     ddl += " COLLATE=";
     ddl += collation.collation;
   }
@@ -264,7 +272,7 @@ static bool parse_table(const Document &doc, string &ddl) {
         cout << "Error Reading Table Name from dd_object" << endl;
         return false;
       }
-            ddl += scape_string(dd_object["name"].GetString());
+      ddl += scape_string(dd_object["name"].GetString());
       ddl += " (\n";
 
       /* table collation */
@@ -274,16 +282,16 @@ static bool parse_table(const Document &doc, string &ddl) {
       }
       find_collation(dd_object["collation_id"].GetInt(), table_collation);
 
-
       if (!parse_columns(dd_object, ddl)) return false;
-      if (!parse_indexes(dd_object, ddl)) return false;
+      int valid_indexes = 0;
+      if (!parse_indexes(dd_object, ddl, valid_indexes)) return false;
 
       ddl.erase(ddl.size() - 2);
+      if (valid_indexes == 0) ddl += "\n";
       ddl += ")";
 
       if (!parse_engine(dd_object, ddl)) return false;
       if (!parse_collation(table_collation, ddl)) return false;
-
     }
   }
   return true;
