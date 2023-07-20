@@ -33,6 +33,53 @@ UNIQUE KEY (`name`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 This project is still in its early stages, partitions, FK and most of data types have not yet been implemented.
 
+Note: MySQL as of 8.0.34 does not expose auto increment data as part of SDI. Importing the original table with AI > 0 on a schema without explicit AI counter works:
+
+```
+mysql> CREATE TABLE `table2` (
+    ->  `ID` int NOT NULL AUTO_INCREMENT,
+    ->  `count` int DEFAULT '0',
+    -> PRIMARY KEY (`ID`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+Query OK, 0 rows affected (0,05 sec)
+
+mysql> SELECT * FROM table2;
+Empty set (0,00 sec)
+
+mysql> ALTER TABLE table2 DISCARD TABLESPACE;
+Query OK, 0 rows affected (0,02 sec)
+
+mysql> ALTER TABLE table2 IMPORT TABLESPACE;
+Query OK, 0 rows affected, 1 warning (0,03 sec)
+
+mysql> SELECT * FROM table2;
++----+-------+
+| ID | count |
++----+-------+
+|  1 |     0 |
+|  2 |     0 |
+|  3 |     0 |
+|  4 |     0 |
+|  5 |     0 |
+|  6 |     0 |
+|  7 |     0 |
+|  8 |     0 |
++----+-------+
+8 rows in set (0,01 sec)
+
+mysql> SHOW CREATE TABLE table2;
++--------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Table  | Create Table                                                                                                                                                                                    |
++--------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| table2 | CREATE TABLE `table2` (
+  `ID` int NOT NULL AUTO_INCREMENT,
+  `count` int DEFAULT '0',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci |
++--------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+1 row in set (0,01 sec)
+
+```
+
 :white_check_mark: - Pull Requests are welcome.
 
 :star: - If you like it, considered giving it a star.
