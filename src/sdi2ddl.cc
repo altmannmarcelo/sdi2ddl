@@ -86,6 +86,23 @@ static bool parse_column_attribute(const rapidjson::Value *column, string &ddl,
 
     return true;
   }
+  if (strcmp(attribute, "default_value_null") == 0) {
+    if (column->FindMember(attribute)->value.GetBool()) {
+      ddl += " DEFAULT NULL";
+    } else {
+      if (!column->HasMember("default_value_utf8")) {
+        cout << "Error Reading column attribute default_value_utf8" << endl;
+        return false;
+      }
+      if (column->FindMember("default_value_utf8")->value.GetString() != "") {
+        ddl += " DEFAULT '";
+        ddl += column->FindMember("default_value_utf8")->value.GetString();
+        ddl += "'";
+      }
+    }
+
+    return true;
+  }
   if (strcmp(attribute, "is_auto_increment") == 0) {
     if (column->FindMember(attribute)->value.GetBool())
       ddl += " AUTO_INCREMENT";
@@ -136,6 +153,8 @@ static bool parse_columns(const rapidjson::Value::ConstObject &dd_object,
     if (!parse_column_attribute(col, ddl, "is_explicit_collation", false))
       return false;
     if (!parse_column_attribute(col, ddl, "is_nullable", false)) return false;
+    if (!parse_column_attribute(col, ddl, "default_value_null", false))
+      return false;
     if (!parse_column_attribute(col, ddl, "is_auto_increment", false))
       return false;
 
