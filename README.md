@@ -1,5 +1,5 @@
 # sdi2ddl - Convert SDI JSON to SHOW CREATE TABLE statement
-[![Build](https://github.com/altmannmarcelo/sdi2ddl/actions/workflows/build.yml/badge.svg)](https://github.com/altmannmarcelo/sdi2ddl/actions/workflows/build.yml)
+[![Build](https://github.com/altmannmarcelo/sdi2ddl/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/altmannmarcelo/sdi2ddl/actions/workflows/build.yml)
 
 Tool to parse MySQL [SDI](https://dev.mysql.com/doc/refman/8.0/en/serialized-dictionary-information.html) and convert into SHOW CREATE TABLE.
 
