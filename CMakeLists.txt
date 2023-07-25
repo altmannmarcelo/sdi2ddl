@@ -17,3 +17,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 FIND_RAPIDJSON()
 add_executable ( sdi2ddl src/sdi2ddl.cc )
+
+enable_testing()
+
+add_subdirectory(test)
