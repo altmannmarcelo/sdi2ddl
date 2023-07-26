@@ -15,11 +15,12 @@ Sometimes is useful to be able to read the DDL of a .ibd as we can restore the t
 ibd2sdi /var/lib/mysql/test/example.ibd | ./sdi2ddl
 CREATE TABLE `example` (
  `ID` int unsigned NOT NULL AUTO_INCREMENT,
- `name` varchar(30),
- `address` text,
- `date` datetime,
-PRIMARY KEY (`ID`),
-UNIQUE KEY (`name`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ `name` varchar(30) DEFAULT NULL,
+ `address` text DEFAULT NULL,
+ `date` datetime DEFAULT NULL,
+ PRIMARY KEY (`ID`),
+ UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
 # How to compile
