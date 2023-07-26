@@ -19,16 +19,21 @@ add_test(NAME test1
 add_test(NAME test2_generated_columns
   COMMAND "${CMAKE_CURRENT_LIST_DIR}/test2_generated_columns.sh"
   "${CMAKE_BINARY_DIR}")
+add_test(NAME test3_json
+  COMMAND "${CMAKE_CURRENT_LIST_DIR}/test3_json.sh"
+  "${CMAKE_BINARY_DIR}")
 
 set_tests_properties(
   prepare
   test1
   test2_generated_columns
+  test3_json
   PROPERTIES ENVIRONMENT "LOCAL_MODE=${LOCAL_TESTS};TEST_FOLDER=${CMAKE_CURRENT_LIST_DIR}")
 
 set_tests_properties(
   test1
   test2_generated_columns
+  test3_json
   PROPERTIES FIXTURES_REQUIRED Db)
 set_tests_properties(prepare         PROPERTIES FIXTURES_SETUP    Db)
 set_tests_properties(cleanup         PROPERTIES FIXTURES_CLEANUP  Db)

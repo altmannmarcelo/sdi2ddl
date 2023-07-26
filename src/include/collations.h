@@ -1,3 +1,6 @@
+#ifndef COLLATIONS_H
+#define COLLATIONS_H
+
 using namespace std;
 struct collation_info_t {
   string collation;
@@ -564,3 +567,5 @@ void populate_charsets() {
   collation_map.insert({323, collation_info_t("utf8mb4_mn_cyrl_0900_as_cs",
                                           "utf8mb4", 323, false)});
 }
+
+#endif /* COLLATIONS_H */
