@@ -2,6 +2,7 @@
 #include <iostream>
 #include <unordered_map>
 #include "include/collations.h"
+#include "include/types.h"
 #include "rapidjson/document.h"
 
 using namespace std;
@@ -46,6 +47,14 @@ static bool is_column_reserved(const char *name) {
          (strcmp(name, "DB_ROLL_PTR") == 0) || (strcmp(name, "DB_ROW_ID") == 0);
 }
 
+/* Check if charset definition should be skipped
+@param[in]	    column_type	  Column JSON object
+@return True if the charset definition should be skipped */
+static bool skip_charset(const int column_type) {
+  /* JSON */
+  return column_type ==  static_cast<int>(enum_column_types::JSON);
+}
+
 /** Parse single column attribute
 @param[in]	    column	  Column JSON object
 @param[in,out]	ddl     	DDL string
@@ -64,6 +73,12 @@ static bool parse_column_attribute(const rapidjson::Value *column, string &ddl,
 
   if (strcmp(attribute, "is_explicit_collation") == 0) {
     if (column->FindMember(attribute)->value.GetBool()) {
+      if (!column->HasMember("type")) {
+        cout << "Error Reading column attribute type" << endl;
+        return false;
+      }
+      if (skip_charset(column->FindMember("type")->value.GetInt())) return true;
+
       if (!column->HasMember("collation_id")) {
         cout << "Error Reading column attribute collation_id" << endl;
         return false;
@@ -233,13 +248,13 @@ static bool parse_indexes(const rapidjson::Value::ConstObject &dd_object,
     int type = (*index)["type"].GetInt();
     switch (type) {
       case 1:
-        ddl += "PRIMARY KEY (";
+        ddl += " PRIMARY KEY (";
         break;
       case 2:
-        ddl += "UNIQUE KEY (";
+        ddl += " UNIQUE KEY (";
         break;
       case 3:
-        ddl += "KEY (";
+        ddl += " KEY (";
         break;
       default:
         cout << "Unsuported Index Type: " << type << endl;
@@ -343,7 +358,7 @@ static bool parse_table(const Document &doc, string &ddl) {
 
       ddl.erase(ddl.size() - 2);
       if (valid_indexes == 0) ddl += "\n";
-      ddl += ")";
+      ddl += "\n)";
 
       if (!parse_engine(dd_object, ddl)) return false;
       if (!parse_collation(table_collation, ddl)) return false;
