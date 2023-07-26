@@ -1,0 +1,5 @@
+# Ignore vscode
+.vscode
+
+# Ignore bld folder
+bld

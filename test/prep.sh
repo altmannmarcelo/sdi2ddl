@@ -2,9 +2,14 @@
 BASEDIR=$1
 DATADIR=${BASEDIR}/datadir
 
-sudo systemctl start mysql.service
-mysql -u root -proot -P 3306 -e "CREATE DATABASE test;"
-exit 0;
+if [ "${LOCAL_MODE}" == "0" ]; then
+  echo "Running in remote mode"
+  sudo systemctl start mysql.service
+  mysql -u root -proot -P 3306 -e "CREATE DATABASE test;"
+  exit 0;
+fi
+
+echo "Running in local mode"
 mkdir -p ${DATADIR}
 mysqld --no-defaults --initialize-insecure --log-error=${BASEDIR}/mysqld.log --datadir=${DATADIR}
 mysqld --no-defaults  --datadir=${DATADIR} --log-error=${DATADIR}/mysqld.log --pid-file=${DATADIR}/mysqld.pid --daemonize

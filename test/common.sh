@@ -1,7 +1,14 @@
 #!/bin/bash
 
 MYSQL=mysql
-MYSQL_ARGS="-u root -P 3306 -proot"
+MYSQL_ARGS="-u root -P 3306"
+SUDO=""
+if [ "${LOCAL_MODE}" == "0" ]; then
+  MYSQL_ARGS="-u root -P 3306 -proot"
+  SUDO="sudo"
+fi
+
+
 
 # Wait for InnoDB to flush all dirty pages
 ########################################################################
