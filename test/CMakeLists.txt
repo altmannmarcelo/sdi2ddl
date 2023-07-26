@@ -1,16 +1,34 @@
+SET(LOCAL_TESTS OFF CACHE BOOL "Flag to change the test to local mode")
 
+IF(LOCAL_TESTS)
+  MESSAGE("-- Running tests in local mode")
+ENDIF()
 
 # Boot MySQL
 add_test(NAME prepare
   COMMAND "${CMAKE_CURRENT_LIST_DIR}/prep.sh"
   "${CMAKE_BINARY_DIR}")
-add_test(NAME cleanup COMMAND "${CMAKE_CURRENT_LIST_DIR}/cleanup.sh" "${CMAKE_BINARY_DIR}")
-add_test(NAME test1 COMMAND "${CMAKE_CURRENT_LIST_DIR}/test1.sh" "${CMAKE_BINARY_DIR}")
+add_test(NAME cleanup
+  COMMAND "${CMAKE_CURRENT_LIST_DIR}/cleanup.sh"
+  "${CMAKE_BINARY_DIR}")
 
-set_tests_properties(test1 PROPERTIES ENVIRONMENT TEST_FOLDER=${CMAKE_CURRENT_LIST_DIR})
-set_tests_properties(test1 PROPERTIES FIXTURES_REQUIRED Db)
+# Tests
+add_test(NAME test1
+  COMMAND "${CMAKE_CURRENT_LIST_DIR}/test1.sh"
+  "${CMAKE_BINARY_DIR}")
+add_test(NAME test2_generated_columns
+  COMMAND "${CMAKE_CURRENT_LIST_DIR}/test2_generated_columns.sh"
+  "${CMAKE_BINARY_DIR}")
+
+set_tests_properties(
+  prepare
+  test1
+  test2_generated_columns
+  PROPERTIES ENVIRONMENT "LOCAL_MODE=${LOCAL_TESTS};TEST_FOLDER=${CMAKE_CURRENT_LIST_DIR}")
+
+set_tests_properties(
+  test1
+  test2_generated_columns
+  PROPERTIES FIXTURES_REQUIRED Db)
 set_tests_properties(prepare         PROPERTIES FIXTURES_SETUP    Db)
 set_tests_properties(cleanup         PROPERTIES FIXTURES_CLEANUP  Db)
-
-  #set_tests_properties(dependsTest12 PROPERTIES DEPENDS "baseTest1;baseTest2")
-  # dependsTest12 runs after baseTest1 and baseTest2, even if they fail

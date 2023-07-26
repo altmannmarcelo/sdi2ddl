@@ -13,6 +13,8 @@ unordered_map<int, string> column_map;
 /* Table charset */
 static collation_info table_collation;
 
+
+
 /** escape a string
 @param[in]	    text	  string to escape
 @return escaped string */
@@ -81,12 +83,38 @@ static bool parse_column_attribute(const rapidjson::Value *column, string &ddl,
     return true;
   }
 
+  if (strcmp(attribute, "generation_expression") == 0) {
+    if (strcmp(column->FindMember(attribute)->value.GetString(), "") != 0) {
+      ddl += " GENERATED ALWAYS AS (";
+      ddl += column->FindMember(attribute)->value.GetString();
+      ddl += ")";
+      if (!column->HasMember("is_virtual")) {
+        cout << "Error Reading column attribute is_virtual" << endl;
+        return false;
+      }
+      if (column->FindMember("is_virtual")->value.GetBool()) {
+        ddl += " VIRTUAL";
+      } else {
+        ddl += " STORED";
+      }
+    }
+    return true;
+  }
+
   if (strcmp(attribute, "is_nullable") == 0) {
     if (!column->FindMember(attribute)->value.GetBool()) ddl += " NOT NULL";
 
     return true;
   }
   if (strcmp(attribute, "default_value_null") == 0) {
+    /* skip default if is generated */
+    if (!column->HasMember("generation_expression")) {
+        cout << "Error Reading column attribute generation_expression" << endl;
+        return false;
+    }
+    if (strcmp(column->FindMember("generation_expression")->value.GetString(), "") != 0)
+      return true;
+
     if (column->FindMember(attribute)->value.GetBool()) {
       ddl += " DEFAULT NULL";
     } else {
@@ -157,6 +185,8 @@ static bool parse_columns(const rapidjson::Value::ConstObject &dd_object,
     if (!parse_column_attribute(col, ddl, "column_type_utf8", true))
       return false;
     if (!parse_column_attribute(col, ddl, "is_explicit_collation", false))
+      return false;
+    if (!parse_column_attribute(col, ddl, "generation_expression", false))
       return false;
     if (!parse_column_attribute(col, ddl, "is_nullable", false)) return false;
     if (!parse_column_attribute(col, ddl, "default_value_null", false))
