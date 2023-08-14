@@ -3,9 +3,10 @@
 #include <unordered_map>
 #include "include/collations.h"
 #include "include/columns.h"
+#include "include/foreign_keys.h"
+#include "include/indexes.h"
 #include "include/types.h"
 #include "include/utils.h"
-#include "include/indexes.h"
 #include "rapidjson/document.h"
 
 using namespace std;
@@ -13,8 +14,6 @@ using namespace rapidjson;
 
 /* Table charset */
 static collation_info table_collation;
-
-
 
 /** Parse Collation
 @param[in]	    collation	  Table collation object
@@ -76,14 +75,22 @@ static bool parse_table(const Document &doc, string &ddl) {
       }
       find_collation(dd_object["collation_id"].GetInt(), table_collation);
 
+      /* table schema */
+      if (!dd_object.HasMember("schema_ref")) {
+        cout << "Error Reading Table schema_ref from dd_object" << endl;
+        return false;
+      }
+      table_schema = dd_object["schema_ref"].GetString();
+
       if (!parse_columns(dd_object, ddl)) return false;
-      int valid_indexes = 0;
-      if (!parse_indexes(dd_object, ddl, valid_indexes)) return false;
+      if (!parse_indexes(dd_object, ddl)) return false;
+
+      if (!parse_foreign_keys(dd_object, ddl)) return false;
 
       ddl.erase(ddl.size() - 2);
-      if (valid_indexes == 0) ddl += "\n";
-      ddl += "\n)";
+      ddl += "\n";
 
+      ddl += ")";
       if (!parse_engine(dd_object, ddl)) return false;
       if (!parse_collation(table_collation, ddl)) return false;
     }

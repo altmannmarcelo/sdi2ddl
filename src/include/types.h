@@ -64,4 +64,20 @@ enum enum_hidden_type {
     IA_RTREE,
     IA_HASH,
     IA_FULLTEXT };
+
+  /* https://github.com/mysql/mysql-server/blob/trunk/sql/dd/types/foreign_key.h
+   */
+  enum class fk_enum_rule {
+    RULE_NO_ACTION = 1,
+    RULE_RESTRICT,
+    RULE_CASCADE,
+    RULE_SET_NULL,
+    RULE_SET_DEFAULT
+  };
+
+  enum class fk_enum_match_option {
+    OPTION_NONE = 1,
+    OPTION_PARTIAL,
+    OPTION_FULL,
+  };
 #endif /* TYPES_H */
