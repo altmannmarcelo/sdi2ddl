@@ -25,12 +25,16 @@ add_test(NAME test3_json
 add_test(NAME test4_functional_index
   COMMAND "${CMAKE_CURRENT_LIST_DIR}/test4_functional_index.sh"
   "${CMAKE_BINARY_DIR}")
+add_test(NAME test5_fk
+  COMMAND "${CMAKE_CURRENT_LIST_DIR}/test5_fk.sh"
+  "${CMAKE_BINARY_DIR}")
 set_tests_properties(
   prepare
   test1
   test2_generated_columns
   test3_json
   test4_functional_index
+  test5_fk
   PROPERTIES ENVIRONMENT "LOCAL_MODE=${LOCAL_TESTS};TEST_FOLDER=${CMAKE_CURRENT_LIST_DIR}")
 
 set_tests_properties(
@@ -38,6 +42,7 @@ set_tests_properties(
   test2_generated_columns
   test3_json
   test4_functional_index
+  test5_fk
   PROPERTIES FIXTURES_REQUIRED Db)
 set_tests_properties(prepare         PROPERTIES FIXTURES_SETUP    Db)
 set_tests_properties(cleanup         PROPERTIES FIXTURES_CLEANUP  Db)

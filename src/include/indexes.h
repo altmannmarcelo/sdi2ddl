@@ -6,12 +6,11 @@
 
 using namespace std;
 /** Parse the indexes section of SDI JSON
-@param[in]	    dd_object	Data Dictionary JSON object
-@param[in,out]	ddl     	DDL string
-@param[in,out]	n_index   Number of indexes
+@param[in]	    dd_object	    Data Dictionary JSON object
+@param[in,out]	ddl     	    DDL string
 @return False in case of errors */
 static bool parse_indexes(const rapidjson::Value::ConstObject &dd_object,
-                          string &ddl, int &n_index) {
+                          string &ddl) {
   if (!dd_object.HasMember("indexes")) {
     cout << "Error Reading indexes from dd_object" << endl;
     return false;
@@ -61,7 +60,6 @@ static bool parse_indexes(const rapidjson::Value::ConstObject &dd_object,
         return false;
         break;
     }
-    n_index++;
     for (auto index_col = (*index)["elements"].Begin();
          index_col != (*index)["elements"].End(); ++index_col) {
       if (!index_col->IsObject()) {
