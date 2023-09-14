@@ -34,8 +34,6 @@ cmake .. && make
 
 # Limitations
 
-This project is still in its early stages; partitions, FK, and most data types have not yet been implemented.
-
 Note: as of 8.0.34, MySQL does not expose auto-increment data as part of SDI. Importing the original table with AI > 0 on a schema without explicit AI counter works:
 
 ```
