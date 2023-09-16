@@ -10,13 +10,25 @@ struct column_t {
   string name;
   string generation_expression;
   enum_hidden_type hidden;
+  enum_column_types type;
+  u_int64_t size;
+  collation_info collation;
   column_t() = default;  // make unordered_map happy
   column_t(int ordinal_position, string name, string generation_expression,
-           enum_hidden_type hidden)
+           enum_hidden_type hidden, enum_column_types type, u_int64_t size,
+           int collation_id)
       : ordinal_position(ordinal_position),
         name(name),
         generation_expression(generation_expression),
-        hidden(hidden){};
+        hidden(hidden),
+        type(type),
+        size(size) {
+    collation_info cl;
+    if (!find_collation(collation_id, cl)) {
+      cout << "Error finding collation info" << endl;
+    }
+    this->collation = cl;
+  };
 };
 
 typedef column_t column_t;
@@ -33,7 +45,11 @@ static column_t add_column_to_map(const rapidjson::Value *column) {
                column->FindMember("name")->value.GetString(),
                column->FindMember("generation_expression")->value.GetString(),
                static_cast<enum_hidden_type>(
-                   column->FindMember("hidden")->value.GetInt()));
+                   column->FindMember("hidden")->value.GetInt()),
+               static_cast<enum_column_types>(
+                   column->FindMember("type")->value.GetInt()),
+               column->FindMember("char_length")->value.GetUint64(),
+               column->FindMember("collation_id")->value.GetInt());
   column_map.insert({col.ordinal_position, col});
   return col;
 }
@@ -110,7 +126,24 @@ static bool is_column_hidden(const column_t &col) {
 @return True if the charset definition should be skipped */
 static bool skip_charset(const int column_type) {
   /* JSON */
-  return column_type == static_cast<int>(enum_column_types::JSON);
+  return column_type == static_cast<int>(enum_column_types::JSON) ||
+         column_type == static_cast<int>(enum_column_types::BLOB) ||
+         column_type == static_cast<int>(enum_column_types::TINY_BLOB) ||
+         column_type == static_cast<int>(enum_column_types::MEDIUM_BLOB) ||
+         column_type == static_cast<int>(enum_column_types::LONG_BLOB);
+}
+
+/* Check if column type support index prefix
+@param[in]	    column_type	  Column column_t object
+@return True if the type supports index prefix */
+static bool support_prefix_index(column_t column) {
+  return column.type == enum_column_types::VARCHAR ||
+         column.type == enum_column_types::TINY_BLOB ||
+         column.type == enum_column_types::MEDIUM_BLOB ||
+         column.type == enum_column_types::LONG_BLOB ||
+         column.type == enum_column_types::BLOB ||
+         column.type == enum_column_types::VAR_STRING ||
+         column.type == enum_column_types::STRING;
 }
 
 /** Parse single column attribute

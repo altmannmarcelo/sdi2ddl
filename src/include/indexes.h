@@ -81,16 +81,22 @@ static bool parse_indexes(const rapidjson::Value::ConstObject &dd_object,
         cout << "Error Index column not found on hash map" << endl;
         return false;
       }
-      if (index_type == IT_MULTIPLE &&
-          column_map[(*index_col)["column_opx"].GetInt()].hidden ==
-              HT_HIDDEN_SQL) {
+      column_t col = column_map[(*index_col)["column_opx"].GetInt()];
+      if (index_type == IT_MULTIPLE && col.hidden == HT_HIDDEN_SQL) {
         ddl += "(";
-        ddl += column_map[(*index_col)["column_opx"].GetInt()]
-                                .generation_expression;
+        ddl += col.generation_expression;
         ddl += "),";
       } else {
-        ddl +=
-            scape_string(column_map[(*index_col)["column_opx"].GetInt()].name);
+        ddl += scape_string(col.name);
+        /* check prefix index */
+        if (support_prefix_index(col)) {
+          if ((*index_col)["length"].GetInt() != col.size) {
+            ddl += "(";
+            int size = (*index_col)["length"].GetInt() / col.collation.max_len;
+            ddl += to_string(size);
+            ddl += ")";
+          }
+        }
         ddl += ",";
       }
     }
