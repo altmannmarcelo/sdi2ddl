@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.16.3)
 
 project(sdi2ddl)
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8")
+    message(FATAL_ERROR "Please use at least GCC version 4.8")
+  elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0")
+    set (CMAKE_CXX_FLAGS "-std=c++11")
+  endif()
+endif()
 
 MACRO (FIND_RAPIDJSON)
   MESSAGE("-- Searching for rapidjson/document.h")
