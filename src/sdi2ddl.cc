@@ -23,11 +23,9 @@ static collation_info table_collation;
 static bool parse_collation(const collation_info &collation, string &ddl) {
   ddl += " DEFAULT CHARSET=";
   ddl += collation.charset;
+  ddl += " COLLATE=";
+  ddl += collation.collation;
 
-  if (!collation.is_default) {
-    ddl += " COLLATE=";
-    ddl += collation.collation;
-  }
   return true;
 };
 
