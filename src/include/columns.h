@@ -114,6 +114,14 @@ static bool is_column_reserved(const char *name) {
          (strcmp(name, "DB_ROLL_PTR") == 0) || (strcmp(name, "DB_ROW_ID") == 0);
 }
 
+/** Check if a column is hidden by user
+@param[in]      name    Column name
+@return True if the column is hidden on DDL */
+static bool is_column_hidden_user(const column_t &col) {
+  return col.hidden == enum_hidden_type::HT_HIDDEN_USER;
+}
+
+
 /** Check if a column is hidden
 @param[in]	name	Column name
 @return True if the column is hidden on DDL */
@@ -217,6 +225,14 @@ static bool parse_column_attribute(const rapidjson::Value *column, string &ddl,
     return true;
   }
 
+  if (strcmp(attribute, "is_gipk") == 0) {
+    auto options = column->FindMember("options")->value.GetString();
+    if (get_gipk_value(options))
+      ddl += " /*!80023 INVISIBLE */";
+
+    return true;
+  }
+
   if (strcmp(attribute, "name") == 0) {
     ddl += " ";
     ddl += scape_string(column->FindMember(attribute)->value.GetString());
@@ -253,7 +269,9 @@ static bool parse_columns(const rapidjson::Value::ConstObject &dd_object,
 
     if (!check_columns(col)) return false;
     column_t column = add_column_to_map(col);
-    if (is_column_hidden(column)) return true;
+
+    if (!is_column_hidden_user(column) && 
+        is_column_hidden(column)) return true; 
 
     /* Column name - Required */
     if (!parse_column_attribute(col, ddl, "name")) return false;
@@ -265,6 +283,7 @@ static bool parse_columns(const rapidjson::Value::ConstObject &dd_object,
     if (!parse_column_attribute(col, ddl, "is_nullable")) return false;
     if (!parse_column_attribute(col, ddl, "default_value_null")) return false;
     if (!parse_column_attribute(col, ddl, "is_auto_increment")) return false;
+    if (!parse_column_attribute(col, ddl, "is_gipk")) return false;
 
     ddl += ",\n";
   }
