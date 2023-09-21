@@ -205,14 +205,20 @@ static bool parse_column_attribute(const rapidjson::Value *column, string &ddl,
                "") != 0)
       return true;
 
-    if (column->FindMember(attribute)->value.GetBool()) {
+    if (column->FindMember(attribute)->value.GetBool() && column->FindMember("default_value_utf8_null")->value.GetBool()) {
       ddl += " DEFAULT NULL";
     } else {
       if (!column->FindMember("default_value_utf8_null")->value.GetBool() &&
           column->FindMember("default_value_utf8")->value.GetString() != "") {
-        ddl += " DEFAULT '";
-        ddl += column->FindMember("default_value_utf8")->value.GetString();
-        ddl += "'";
+	      auto default_option = column->FindMember("default_option")->value.GetString();
+	      if (strcmp(default_option, "") == 0) {
+                      ddl += " DEFAULT '";
+                      ddl += column->FindMember("default_value_utf8")->value.GetString();
+                      ddl += "'";
+      	      } else {
+		      ddl += " DEFAULT ";
+        	      ddl += default_option;
+	      }
       }
     }
 
