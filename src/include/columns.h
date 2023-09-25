@@ -227,8 +227,7 @@ static bool parse_column_attribute(const rapidjson::Value *column, string &ddl,
 
   if (strcmp(attribute, "is_gipk") == 0) {
     auto options = column->FindMember("options")->value.GetString();
-    if (get_gipk_value(options))
-      ddl += " /*!80023 INVISIBLE */";
+    if (is_kipk(options)) ddl += " /*!80023 INVISIBLE */";
 
     return true;
   }
