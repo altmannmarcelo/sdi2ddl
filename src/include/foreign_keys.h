@@ -68,12 +68,11 @@ static bool parse_foreign_keys(const rapidjson::Value::ConstObject &dd_object,
           (*fk_col)["referenced_column_name"].GetString());
 
       ddl += scape_string(column_map[(*fk_col)["column_opx"].GetInt()].name);
-      ddl += ",";
+      ddl += ", ";
     }
     ddl.pop_back();
-
-    ddl += ",";
     ddl.pop_back();
+
     ddl += ") REFERENCES ";
     if (!fk->HasMember("referenced_table_schema_name")) {
       cout << "Error Reading referenced_table_schema_name from fk object"
@@ -94,8 +93,9 @@ static bool parse_foreign_keys(const rapidjson::Value::ConstObject &dd_object,
     for (auto ref_col = reference_names.begin();
          ref_col != reference_names.end(); ++ref_col) {
       ddl += scape_string(*ref_col);
-      ddl += ",";
+      ddl += ", ";
     }
+    ddl.pop_back();
     ddl.pop_back();
     ddl += ")";
     /* ON DELETE */

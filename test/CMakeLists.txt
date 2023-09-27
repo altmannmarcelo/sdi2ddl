@@ -34,6 +34,9 @@ add_test(NAME test6_prefix_index
 add_test(NAME test7_gipk
   COMMAND "${CMAKE_CURRENT_LIST_DIR}/test7_gipk.sh"
   "${CMAKE_BINARY_DIR}")
+add_test(NAME test8_ddl
+  COMMAND "${CMAKE_CURRENT_LIST_DIR}/test8_compare_ddl.sh"
+  "${CMAKE_BINARY_DIR}")
 set_tests_properties(
   prepare
   test1
@@ -43,6 +46,7 @@ set_tests_properties(
   test5_fk
   test6_prefix_index
   test7_gipk
+  test8_ddl
   PROPERTIES ENVIRONMENT "LOCAL_MODE=${LOCAL_TESTS};TEST_FOLDER=${CMAKE_CURRENT_LIST_DIR}")
 
 set_tests_properties(
@@ -53,6 +57,7 @@ set_tests_properties(
   test5_fk
   test6_prefix_index
   test7_gipk
+  test8_ddl
   PROPERTIES FIXTURES_REQUIRED Db)
 set_tests_properties(prepare         PROPERTIES FIXTURES_SETUP    Db)
 set_tests_properties(cleanup         PROPERTIES FIXTURES_CLEANUP  Db)
