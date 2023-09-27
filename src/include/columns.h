@@ -269,8 +269,7 @@ static bool parse_columns(const rapidjson::Value::ConstObject &dd_object,
     if (!check_columns(col)) return false;
     column_t column = add_column_to_map(col);
 
-    if (!is_column_hidden_user(column) && 
-        is_column_hidden(column)) return true; 
+    if (!is_column_hidden_user(column) && is_column_hidden(column)) continue;
 
     /* Column name - Required */
     if (!parse_column_attribute(col, ddl, "name")) return false;

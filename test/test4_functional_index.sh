@@ -8,8 +8,8 @@ DATADIR=$(${MYSQL} ${MYSQL_ARGS} -NB -e "SELECT @@datadir")
 TABLE_NAME="test4_functional_index"
 
 
-echo "CREATE table test.${TABLE_NAME} (col1 LONGTEXT, INDEX idx1 ((SUBSTRING(col1, 1, 10))));" | ${MYSQL} ${MYSQL_ARGS}
-echo "INSERT INTO test.${TABLE_NAME} VALUES('foo');" | ${MYSQL} ${MYSQL_ARGS}
+echo "CREATE table test.${TABLE_NAME} (col1 LONGTEXT, col2 datetime DEFAULT NULL, INDEX idx1 ((SUBSTRING(col1, 1, 10))), INDEX idx2 ((cast(col2 as date))));" | ${MYSQL} ${MYSQL_ARGS}
+echo "INSERT INTO test.${TABLE_NAME} VALUES('foo', NOW());" | ${MYSQL} ${MYSQL_ARGS}
 innodb_wait_for_flush_all
 
 ${SUDO} ibd2sdi ${DATADIR}/test/${TABLE_NAME}.ibd | ${BASEDIR}/sdi2ddl > ${BASEDIR}/test/${TABLE_NAME}.sql
@@ -21,7 +21,7 @@ ${SUDO} cp ${DATADIR}/test/${TABLE_NAME}.ibd ${BASEDIR}/test/${TABLE_NAME}.ibd
 echo "UNLOCK TABLES;" >&3
 exec 3>&-
 
-echo "INSERT INTO test.${TABLE_NAME} VALUES('bar');" | ${MYSQL} ${MYSQL_ARGS}
+echo "INSERT INTO test.${TABLE_NAME} VALUES('bar', NOW());" | ${MYSQL} ${MYSQL_ARGS}
 echo "DROP TABLE test.${TABLE_NAME};" | ${MYSQL} ${MYSQL_ARGS}
 cat ${BASEDIR}/test/${TABLE_NAME}.sql | ${MYSQL} ${MYSQL_ARGS} test
 echo "ALTER TABLE test.${TABLE_NAME} DISCARD TABLESPACE;" | ${MYSQL} ${MYSQL_ARGS}
